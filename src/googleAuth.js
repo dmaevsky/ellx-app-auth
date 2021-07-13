@@ -1,13 +1,16 @@
 import { whenFinished } from 'conclure';
 import { cps } from 'conclure/effects';
 
-const IFRAME_ORIGIN = 'https://ellx.io';
+const IFRAME_SOURCE = {
+  production: 'https://ellx.io/module/GoogleAuth.e5b91ed3.html',
+  staging: 'https://test.ellx.io/module/GoogleAuth.c3f90347.html'
+};
 
-function loadGoogleAuthFrame(cb) {
+function loadGoogleAuthFrame(environment, cb) {
   const iframe = document.createElement('iframe');
 
   iframe.id = "google-auth";
-  iframe.src = `${IFRAME_ORIGIN}/module/GoogleAuth.e5b91ed3.html`;
+  iframe.src = IFRAME_SOURCE[environment];
   iframe.title = "";
   iframe.style = "position:absolute;width:0;height:0;border:0;";
   iframe.onload = () => cb(null);
@@ -43,9 +46,9 @@ function sendAuthRequest(cb) {
 
 let googleAuthFrameLoading = null;
 
-export function* signInWithGoogle() {
+export function* signInWithGoogle(environment) {
   if (!googleAuthFrameLoading) {
-    googleAuthFrameLoading = cps(loadGoogleAuthFrame);
+    googleAuthFrameLoading = cps(loadGoogleAuthFrame, environment);
 
     whenFinished(googleAuthFrameLoading, ({ cancelled, error }) => {
       if (cancelled || error) {

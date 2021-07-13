@@ -1,7 +1,9 @@
 import { xhr } from './xhr.js';
 import { signInWithGoogle } from './googleAuth.js';
 
-export default ({ appId, apiUrl }) => {
+export const API_URL_PROD = 'https://api.ellx.io';
+
+export const createAPI = ({ appId, apiUrl }) => {
 
   const api = xhr(apiUrl, {
     credentials: 'include',
@@ -9,6 +11,8 @@ export default ({ appId, apiUrl }) => {
       'Content-Type': 'application/json',
     },
   });
+
+  const environment = apiUrl === API_URL_PROD ? 'production' : 'staging';
 
   return {
     appLoginSendOTP({
@@ -24,7 +28,7 @@ export default ({ appId, apiUrl }) => {
 
     *appLogin({ email, password, phone, code, pollingCode = '', withGoogle }) {
       if (withGoogle) {
-        withGoogle = yield signInWithGoogle();
+        withGoogle = yield signInWithGoogle(environment);
       }
       return api.post(`/app-login/${appId}`, { email, phone, code, password, pollingCode, withGoogle });
     },

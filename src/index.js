@@ -1,6 +1,6 @@
 import { writable } from 'tinyx';
 import { allSettled } from 'conclure/combinators';
-import createAPI from './create_api.js';
+import { API_URL_PROD, createAPI } from './create_api.js';
 import { initFirebase } from './firebase.js';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -26,24 +26,14 @@ const production = {
 
 export default function initializeAuth({
   appId,
-  apiUrl = 'https://api.ellx.io'
+  apiUrl = API_URL_PROD
 }) {
-
-  const firebaseConfigs = {
-    'https://api.ellx.io': production,
-    'https://test-api.ellx.io': staging,
-    'http://localhost:8080': staging
-  };
 
   if (!appId) {
     throw new Error('appId is missing');
   }
 
-  const config = firebaseConfigs[apiUrl];
-
-  if (!config) {
-    throw new Error(`apiUrl should be one of [${Object.keys(firebaseConfigs).join(', ')}]`);
-  }
+  const config = apiUrl === API_URL_PROD ? production : staging;
 
   const {
     appLoginSendOTP,
