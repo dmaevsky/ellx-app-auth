@@ -28,18 +28,21 @@ function loadGoogleAuthFrame(environment, cb) {
 }
 
 function sendAuthRequest(cb) {
-  const authWindow = document.getElementById('google-auth').contentWindow;
+  const iframe = document.getElementById('google-auth');
+  const iframeOrigin = new URL(iframe.src).origin;
+
+  const authWindow = iframe.contentWindow;
   const id = String(Math.random());
 
   const listen = ({ data: { type, reqId, error, googleToken }, origin, source }) => {
-    if (source !== authWindow || origin !== IFRAME_ORIGIN || type !== 'google-auth' || reqId !== id) return;
+    if (source !== authWindow || origin !== iframeOrigin || type !== 'google-auth' || reqId !== id) return;
 
     if (error) cb(new Error(error));
     else cb(null, googleToken);
   }
 
   window.addEventListener('message', listen, { once: true });
-  authWindow.postMessage({ type: 'login', reqId: id }, IFRAME_ORIGIN);
+  authWindow.postMessage({ type: 'login', reqId: id }, iframeOrigin);
 
   return () => window.removeEventListener('message', listen);
 }
