@@ -19,7 +19,7 @@ export default ({ appId, apiUrl }) => {
       redirectUrl
     }) {
       console.log('[Ellx auth]: Sending an OTP to', phone || email);
-      return api.put(`/app-login/${appId}`, { email, phone, password, language, redirectUrl });
+      return api.post(`/app-login/${appId}/otp`, { email, phone, password, language, redirectUrl });
     },
 
     *appLogin({ email, password, phone, code, pollingCode = '', withGoogle }) {
@@ -30,7 +30,7 @@ export default ({ appId, apiUrl }) => {
     },
 
     appLogout() {
-      return api.delete(`/app-login/${appId}`);
+      return api.post(`/app-login/${appId}/logout`);
     },
 
     appSetPassword({ newPassword }) {

@@ -1,6 +1,6 @@
 {
   "name": "@ellx/auth",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Authentication for Ellx apps",
   "main": "src/index.js",
   "type": "module",
@@ -28,8 +28,7 @@
   },
   "homepage": "https://github.com/dmaevsky/ellx-app-auth#readme",
   "devDependencies": {
-    "ava": "^3.15.0",
-    "conclure": "^2.0.0"
+    "ava": "^3.15.0"
   },
   "peerDependencies": {
     "conclure": "^2.0.0"

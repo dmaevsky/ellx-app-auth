@@ -1,6 +1,7 @@
-import createAPI from './create_api.js';
 import { writable } from 'tinyx';
 import { allSettled } from 'conclure/combinators';
+import createAPI from './create_api.js';
+import { initFirebase } from './firebase.js';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const staging = {
