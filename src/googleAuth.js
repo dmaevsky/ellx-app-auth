@@ -1,0 +1,59 @@
+import { whenFinished } from 'conclure';
+import { cps } from 'conclure/effects';
+
+const IFRAME_ORIGIN = 'https://ellx.io';
+
+function loadGoogleAuthFrame(cb) {
+  const iframe = document.createElement('iframe');
+
+  iframe.id = "google-auth";
+  iframe.src = `${IFRAME_ORIGIN}/module/GoogleAuth.e5b91ed3.html`;
+  iframe.title = "";
+  iframe.style = "position:absolute;width:0;height:0;border:0;";
+  iframe.onload = () => cb(null);
+  iframe.onerror = e => {
+    document.body.removeChild(iframe);
+    cb(e);
+  };
+
+  document.body.appendChild(iframe);
+
+  return () => {
+    iframe.onload = iframe.onerror = null;
+    document.body.removeChild(iframe);
+  }
+}
+
+function sendAuthRequest(cb) {
+  const authWindow = document.getElementById('google-auth').contentWindow;
+  const id = String(Math.random());
+
+  const listen = ({ data: { type, reqId, error, googleToken }, origin, source }) => {
+    if (source !== authWindow || origin !== IFRAME_ORIGIN || type !== 'google-auth' || reqId !== id) return;
+
+    if (error) cb(new Error(error));
+    else cb(null, googleToken);
+  }
+
+  window.addEventListener('message', listen, { once: true });
+  authWindow.postMessage({ type: 'login', reqId: id }, IFRAME_ORIGIN);
+
+  return () => window.removeEventListener('message', listen);
+}
+
+let googleAuthFrameLoading = null;
+
+export function* signInWithGoogle() {
+  if (!googleAuthFrameLoading) {
+    googleAuthFrameLoading = cps(loadGoogleAuthFrame);
+
+    whenFinished(googleAuthFrameLoading, ({ cancelled, error }) => {
+      if (cancelled || error) {
+        googleAuthFrameLoading = null;
+      }
+    });
+  }
+  yield googleAuthFrameLoading;
+
+  return cps(sendAuthRequest);
+}
