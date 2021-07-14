@@ -1,5 +1,31 @@
 import { whenFinished } from 'conclure';
-import { call, cps } from 'conclure/effects';
+import { cps } from 'conclure/effects';
+
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+const firebaseConfig = {
+  staging: {
+    apiKey: "AIzaSyCK2U42tWruOdUT7URPgjKOiKO52tC4YQY",
+    authDomain: "ellx-staging.firebaseapp.com",
+    projectId: "ellx-staging",
+    storageBucket: "ellx-staging.appspot.com",
+    messagingSenderId: "21869695324",
+    appId: "1:21869695324:web:51962725a5255be5fb3199",
+    measurementId: "G-SFXW51EX9E"
+  },
+
+  production: {
+    apiKey: "AIzaSyCPdKFv0MJB3XafZIKZRSrJDsIzoCdWA_E",
+    authDomain: "ellx-prod.firebaseapp.com",
+    projectId: "ellx-prod",
+    storageBucket: "ellx-prod.appspot.com",
+    messagingSenderId: "1065952316536",
+    appId: "1:1065952316536:web:e4c1461dce1ba2d50b718d",
+    measurementId: "G-BM2JSG20KZ"
+  }
+};
+
+const defaultEnvironment = (typeof window === 'object' && window.location.hostname !== 'localhost' ? 'production' : 'staging');
 
 function loadFirebase(cb) {
   // The core Firebase JS SDK is always required and must be listed first
@@ -41,14 +67,9 @@ function loadFirebase(cb) {
 
 let firebaseLoading = null;
 
-export function initFirebase(config) {
+export function* initFirebase(environment = defaultEnvironment) {
   if (!firebaseLoading) {
-    firebaseLoading = call(function* init() {
-      yield cps(loadFirebase);
-
-      firebase.initializeApp(config);
-      console.debug('Firebase initialized');
-    });
+    firebaseLoading = cps(loadFirebase);
 
     whenFinished(firebaseLoading, ({ cancelled, error }) => {
       if (cancelled || error) {
@@ -56,5 +77,10 @@ export function initFirebase(config) {
       }
     });
   }
-  return firebaseLoading;
+  yield firebaseLoading;
+
+  firebase.initializeApp(firebaseConfig[environment] || firebaseConfig.staging);
+  console.debug('Firebase initialized');
+
+  return firebase;
 }

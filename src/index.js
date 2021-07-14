@@ -1,28 +1,9 @@
 import { writable } from 'tinyx';
-import { allSettled } from 'conclure/combinators';
+import { conclude } from 'conclure';
 import { API_URL_PROD, createAPI } from './create_api.js';
-import { initFirebase } from './firebase.js';
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const staging = {
-  apiKey: "AIzaSyCK2U42tWruOdUT7URPgjKOiKO52tC4YQY",
-  authDomain: "ellx-staging.firebaseapp.com",
-  projectId: "ellx-staging",
-  storageBucket: "ellx-staging.appspot.com",
-  messagingSenderId: "21869695324",
-  appId: "1:21869695324:web:51962725a5255be5fb3199",
-  measurementId: "G-SFXW51EX9E"
-};
-
-const production = {
-  apiKey: "AIzaSyCPdKFv0MJB3XafZIKZRSrJDsIzoCdWA_E",
-  authDomain: "ellx-prod.firebaseapp.com",
-  projectId: "ellx-prod",
-  storageBucket: "ellx-prod.appspot.com",
-  messagingSenderId: "1065952316536",
-  appId: "1:1065952316536:web:e4c1461dce1ba2d50b718d",
-  measurementId: "G-BM2JSG20KZ"
-};
+const run = it => new Promise((resolve, reject) => conclude(it, (error, result) => error ? reject(error) : resolve(result)));
+const promisify = g => (...args) => run(g(...args));
 
 export default function initializeAuth({
   appId,
@@ -33,47 +14,38 @@ export default function initializeAuth({
     throw new Error('appId is missing');
   }
 
-  const config = apiUrl === API_URL_PROD ? production : staging;
-
   const {
-    appLoginSendOTP,
+    appLoginSendOTP: loginOTP,
     appLogin,
     appLogout,
-    appSetPassword
+    appSetPassword: setPassword
   } = createAPI({ appId, apiUrl });
 
   const auth = writable(null);
 
-  function* signIn(options) {
-    // Using allSettled here because we want Firebase regardless of whether the signIn succeeds or not
+  function* login(options) {
+    const userInfo = yield appLogin(options || {});
+    auth.set(userInfo);
 
-    const results = yield allSettled([
-      appLogin(options || {}),
-      initFirebase(config)
-    ]);
+    return `Logged in as [${[phone, email].filter(Boolean).join(', ')}]`;
+  };
 
-    const failed = results.find(r => r.error);
-    if (failed) throw failed.error;
-
-    const { email, phone, appId, authToken, name, picture } = results[0].result || {};
-    if (!authToken) return null;
-
-    const { user } = yield firebase.auth().signInWithCustomToken(authToken);
-
-    return { email, phone, appId, userId: user.uid, name, picture };
-  }
-
-  const login = options => auth.set(signIn(options));
-  login.withOTP = appLoginSendOTP;
-  login.setPassword = appSetPassword;
-
-  function logout() {
-    if (!auth.get()) return;
-
-    appLogout();
-    firebase.auth().signOut();
+  function* logout() {
+    yield appLogout();
     auth.set(null);
-  }
 
-  return { auth, login, logout };
+    return 'Logged out';
+  };
+
+  const Auth = { login, logout, loginOTP, setPassword };
+
+  Auth.promises = Object.keys(Auth)
+    .reduce((acc, method) => Object.assign(acc,
+      { [method]: promisify(Auth[method]) }
+    ), {});
+
+  Auth.auth = auth;
+  return Auth;
 }
+
+export { initFirebase } from './firebase.js';
