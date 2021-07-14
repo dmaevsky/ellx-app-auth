@@ -24,10 +24,10 @@ export default function initializeAuth({
   const auth = writable(null);
 
   function* login(options) {
-    const userInfo = yield appLogin(options || {});
-    auth.set(userInfo);
+    const user = yield appLogin(options || {});
+    auth.set(user);
 
-    return `Logged in as [${[phone, email].filter(Boolean).join(', ')}]`;
+    return `Logged in as [${[user.phone, user.email].filter(Boolean).join(', ')}]`;
   };
 
   function* logout() {
