@@ -2,6 +2,7 @@ import { xhr } from './xhr.js';
 import { signInWithGoogle } from './googleAuth.js';
 
 export const API_URL_PROD = 'https://api.ellx.io';
+export const API_URL_STAGING = 'https://test-api.ellx.io';
 
 export const createAPI = ({ appId, apiUrl }) => {
 

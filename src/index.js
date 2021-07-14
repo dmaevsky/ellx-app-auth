@@ -1,13 +1,15 @@
 import { writable } from 'tinyx';
 import { conclude } from 'conclure';
-import { API_URL_PROD, createAPI } from './create_api.js';
+import { API_URL_PROD, API_URL_STAGING, createAPI } from './create_api.js';
+
+const defaultApiUrl = (typeof window === 'object' && window.location.hostname !== 'localhost' ? API_URL_PROD : API_URL_STAGING);
 
 const run = it => new Promise((resolve, reject) => conclude(it, (error, result) => error ? reject(error) : resolve(result)));
 const promisify = g => (...args) => run(g(...args));
 
 export default function initializeAuth({
   appId,
-  apiUrl = API_URL_PROD
+  apiUrl = defaultApiUrl
 }) {
 
   if (!appId) {
