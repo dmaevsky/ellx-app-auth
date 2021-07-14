@@ -38,7 +38,10 @@ function loadFirebase(cb) {
   let count = 0;
 
   const onload = () => {
-    if (++count === firebaseScripts.length) cb();
+    if (++count === firebaseScripts.length) {
+      console.debug('Firebase loaded');
+      cb();
+    }
   }
 
   const scripts = firebaseScripts.map(src => {
@@ -79,8 +82,11 @@ export function* initFirebase(environment = defaultEnvironment) {
   }
   yield firebaseLoading;
 
-  firebase.initializeApp(firebaseConfig[environment] || firebaseConfig.staging);
-  console.debug('Firebase initialized');
-
-  return firebase;
+  try {
+    return firebase.app(environment);
+  }
+  catch {
+    const config = firebaseConfig[environment] || firebaseConfig.staging;
+    return firebase.initializeApp(config, environment);
+  }
 }
