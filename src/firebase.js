@@ -38,31 +38,33 @@ function loadFirebase(cb) {
   let count = 0;
 
   const onload = () => {
-    if (++count === firebaseScripts.length) {
+    if (++count === scripts.length) {
       console.debug('Firebase loaded');
       cb();
     }
   }
 
   const scripts = firebaseScripts.map(src => {
+    if (document.getElementById(src)) return false;
+
     const script = document.createElement('script');
 
     script.onload = onload;
     script.onerror = e => (cancel(), cb(e))
-    script.src = src;
+    script.id = script.src = src;
     script.async = false;
     script.defer = true;
 
     document.body.appendChild(script);
     return script;
-  });
+  })
+  .filter(Boolean);
 
   const cancel = () => {
     scripts.forEach(script => {
       script.onload = script.onerror = null;
       document.body.removeChild(script);
     });
-    window.firebase = undefined;
   }
 
   return cancel;
