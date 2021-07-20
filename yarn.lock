@@ -467,11 +467,6 @@ concat-map@0.0.1:
   resolved "https://registry.yarnpkg.com/concat-map/-/concat-map-0.0.1.tgz#d8a96bd77fd68df7793a73036a3ba0d5405d477b"
   integrity sha1-2Klr13/Wjfd5OnMDajug1UBdR3s=
 
-conclure@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/conclure/-/conclure-2.0.0.tgz#ff20fb16a7f60642e6a035a19cc4bbd224d3c2b0"
-  integrity sha512-ULCdVJtK6g6oKKaY7Ezxil0/Y1yuewNO+/553otNTpfWvAA+Z/qj+WKswanOjLGD4ButZf78t/y8Orhx7YTQ5A==
-
 concordance@^5.0.1:
   version "5.0.4"
   resolved "https://registry.yarnpkg.com/concordance/-/concordance-5.0.4.tgz#9896073261adced72f88d60e4d56f8efc4bbbbd2"
