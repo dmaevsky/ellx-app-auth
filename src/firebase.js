@@ -74,7 +74,7 @@ function loadFirebase(cb) {
 
 let firebaseLoading = null;
 
-export function* initFirebase(environment = defaultEnvironment) {
+export function* initFirebase(appName = '[DEFAULT]', environment = defaultEnvironment) {
   if (!firebaseLoading) {
     firebaseLoading = cps(loadFirebase);
 
@@ -87,10 +87,10 @@ export function* initFirebase(environment = defaultEnvironment) {
   yield firebaseLoading;
 
   try {
-    return firebase.app(environment);
+    return firebase.app(appName);
   }
   catch {
     const config = firebaseConfig[environment] || firebaseConfig.staging;
-    return firebase.initializeApp(config, environment);
+    return firebase.initializeApp(config, appName);
   }
 }

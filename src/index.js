@@ -25,11 +25,9 @@ export default function initializeAuth({
 
   const auth = writable(null);
 
-  function* login(options) {
-    const user = yield appLogin(options || {});
-    auth.set(user);
-
-    return `Logged in as [${[user.phone, user.email].filter(Boolean).join(', ')}]`;
+  function login(options) {
+    auth.set(appLogin(options || {}));
+    return auth;
   };
 
   function* logout() {
@@ -39,14 +37,13 @@ export default function initializeAuth({
     return 'Logged out';
   };
 
-  const Auth = { login, logout, loginOTP, setPassword };
+  const Auth = { login, logout, loginOTP, setPassword, auth };
 
-  Auth.promises = Object.keys(Auth)
+  Auth.promises = ['logout', 'loginOTP', 'setPassword']
     .reduce((acc, method) => Object.assign(acc,
       { [method]: promisify(Auth[method]) }
     ), {});
 
-  Auth.auth = auth;
   return Auth;
 }
 
