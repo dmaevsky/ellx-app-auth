@@ -60,6 +60,8 @@ function loadFirebase(cb) {
   })
   .filter(Boolean);
 
+  if (!scripts.length) cb();
+
   const cancel = () => {
     scripts.forEach(script => {
       script.onload = script.onerror = null;
