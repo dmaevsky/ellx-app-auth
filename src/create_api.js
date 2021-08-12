@@ -27,11 +27,17 @@ export const createAPI = ({ appId, apiUrl }) => {
       return api.post(`/app-login/${appId}/otp`, { email, phone, password, language, redirectUrl });
     },
 
-    *appLogin({ email, password, phone, code, pollingCode = '', withGoogle }) {
+    *appLogin({ email, password, phone, code, pollingCode = '', withGoogle, sessionToken }) {
       if (withGoogle) {
         withGoogle = yield signInWithGoogle(environment);
       }
-      return api.post(`/app-login/${appId}`, { email, phone, code, password, pollingCode, withGoogle });
+
+      const headers = sessionToken ? {
+        'Content-Type': 'application/json',
+        'Authorization': sessionToken
+      } : {};
+
+      return api.post(`/app-login/${appId}`, { email, phone, code, password, pollingCode, withGoogle }, { headers });
     },
 
     appLogout() {
