@@ -1,6 +1,6 @@
 {
   "name": "@ellx/auth",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Authentication for Ellx apps",
   "main": "src/index.js",
   "type": "module",

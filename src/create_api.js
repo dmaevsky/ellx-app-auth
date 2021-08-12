@@ -32,10 +32,10 @@ export const createAPI = ({ appId, apiUrl }) => {
         withGoogle = yield signInWithGoogle(environment);
       }
 
-      const headers = sessionToken ? {
+      const headers = {
         'Content-Type': 'application/json',
-        'Authorization': sessionToken
-      } : {};
+        ...(sessionToken && { 'Authorization': sessionToken })
+      };
 
       return api.post(`/app-login/${appId}`, { email, phone, code, password, pollingCode, withGoogle }, { headers });
     },
